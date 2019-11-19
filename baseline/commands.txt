@@ -1,0 +1,5 @@
+screen 
+python3 /home/scratch1/cs4793/program/spacenet/src/models/train_model.py /home/scratch1/cs4793/data/xBD/spacenet_gt/dataSet/ /home/scratch1/cs4793/data/xBD/spacenet_gt/images/ /home/scratch1/cs4793/data/xBD/spacenet_gt/labels/ -e 10 --tcrop 32 --vcrop 32
+
+
+python "C:\Dev\Workspaces\Python\AI Learning\program\xview2-baseline-master\spacenet\src\models\train_model.py" "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD\spacenet_gt\dataSet"\ "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD\spacenet_gt\images"\ "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD\spacenet_gt\labels"\ -e 10 --tcrop 16 --vcrop 16
