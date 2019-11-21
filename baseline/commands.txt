@@ -1,5 +1,17 @@
+#CSX
 screen 
 python3 /home/scratch1/cs4793/program/spacenet/src/models/train_model.py /home/scratch1/cs4793/data/xBD/spacenet_gt/dataSet/ /home/scratch1/cs4793/data/xBD/spacenet_gt/images/ /home/scratch1/cs4793/data/xBD/spacenet_gt/labels/ -e 10 --tcrop 32 --vcrop 32
 
+python3 /home/scratch1/cs4793/program/model/process_data.py --input_dir /home/scratch1/cs4793/data/xBD --output_dir /home/scratch1/cs4793/data/xBD_out --output_dir_csv /home/scratch1/cs4793/data/xBD_csv --val_split_pct .2
+
+python3 /home/scratch1/cs4793/program/model/damage_classification.py --train_data /home/scratch1/cs4793/data/xBD/polygons/train --train_csv train.csv --test_data /path/to/XBD/polygons/test --test_csv test.csv --model_out path/to/xBD/baseline_trial --model_in /path/to/saved-model-01.hdf5`
+
+
+
+#Local
 
 python "C:\Dev\Workspaces\Python\AI Learning\program\xview2-baseline-master\spacenet\src\models\train_model.py" "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD\spacenet_gt\dataSet"\ "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD\spacenet_gt\images"\ "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD\spacenet_gt\labels"\ -e 10 --tcrop 16 --vcrop 16
+
+python "C:\Dev\Workspaces\Python\AI Learning\program\xview2-baseline-master\model\process_data.py" --input_dir "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD" --output_dir "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD_out" --output_dir_csv "C:\Dev\Workspaces\Python\AI Learning\program\data\xBD_csv" --val_split_pct .2
+
+python3 /home/scratch1/cs4793/program/model/damage_classification.py --train_data /path/to/XBD/polygons/train --train_csv train.csv --test_data /path/to/XBD/polygons/test --test_csv test.csv --model_out path/to/xBD/baseline_trial --model_in /path/to/saved-model-01.hdf5`
