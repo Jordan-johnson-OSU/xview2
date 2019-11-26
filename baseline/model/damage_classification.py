@@ -55,7 +55,7 @@ NUM_EPOCHS = 100
 LEARNING_RATE = 0.0001
 RANDOM_SEED = 123
 LOG_STEP = 150
-LOG_DIR = '/path/to/logs' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+LOG_DIR = "C:/Dev/Workspaces/Python/CS4793/xview2/baseline/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
 damage_intensity_encoding = dict()
 damage_intensity_encoding[3] = '3'

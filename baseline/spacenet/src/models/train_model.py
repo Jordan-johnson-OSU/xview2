@@ -110,7 +110,7 @@ def train_model():
     train = LabeledImageDataset(os.path.join(args.dataset, "train.txt"), args.images, args.labels, 
                                 mean=mean, crop_size=args.tcrop, test=False, distort=False)
     
-    test = LabeledImageDataset (os.path.join(args.dataset, "val.txt"), args.images, args.labels, 
+    test = LabeledImageDataset(os.path.join(args.dataset, "val.txt"), args.images, args.labels,
                                 mean=mean, crop_size=args.vcrop, test=True, distort=False)
 
     train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
