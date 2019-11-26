@@ -58,7 +58,7 @@ def test_model(model, test_data, test_labels):
     :return:
     """
     logging.info("Started test model")
-    model.evaluate(test_data, test_labels)
+    model.evaluate(test_data, test_labels, batch_size=64)
     logging.info("Finished test model")
     return model
 
@@ -73,10 +73,13 @@ def train_model(model, train_data, train_labels):
     """
     logging.info("Started train model")
 
-    model.fit(train_data, train_labels, epochs=10)
+    model.fit(train_data, train_labels, batch_size=64, epochs=10)
 
     """
     train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, test_size=.15)
+    
+    # TODO: save the split data here? and pre load next time?
+    
     model.fit(train_data, train_labels, epochs=10,
          validation_data=(val_data, val_labels))
     """
@@ -186,7 +189,7 @@ def load_json_and_img(data_dir, out_dir, use_files):
         labels_array = np.load(out_dir + '/label.npy')
         logging.info("np arrays loaded from files.")
     else:
-        data_dir = data_dir + "/train/images"
+        # data_dir = data_dir + "/train/images"
 
         # If you wanted to Hard coded Path for training data...
         # data_dir = "C:/Dev/Workspaces/Python/AI Learning/program/data/train/images"
@@ -207,7 +210,7 @@ def load_json_and_img(data_dir, out_dir, use_files):
             label_path = img_path.replace('png', 'json').replace('images', 'labels')
             label_file = open(label_path)
             label_data = json.load(label_file)
-            damage_encorder = 0
+            damage_encoder = 0
 
             for feat in label_data['features']['xy']:
 
@@ -215,14 +218,14 @@ def load_json_and_img(data_dir, out_dir, use_files):
                 try:
                     damage_type = feat['properties']['subtype']
                     if damage_type != "no-damage":
-                        damage_encorder = damage_intensity_encoding[damage_type]
+                        damage_encoder = damage_intensity_encoding[damage_type]
                         break
 
                 except:  # pre-disaster damage is default no-damage
-                    damage_encorder = damage_intensity_encoding["no-damage"]
+                    damage_encoder = damage_intensity_encoding["no-damage"]
                     continue
 
-            labels.append(damage_encorder)
+            labels.append(damage_encoder)
 
         images_array = np.asarray(images)
         labels_array = np.asarray(labels)
@@ -276,14 +279,18 @@ def main():
     3. Cake!
     """
 
-    # load the images and labels
-    image_array, label_array = load_json_and_img(args.data, args.out, args.use_numpy_files)
+    # load the Training images and labels
+    image_array, label_array = load_json_and_img(args.data + "/train/images", args.out + "/train", args.use_numpy_files)
 
     # build the model
     model = build_model(image_array.shape)
 
     # train the model
     model = train_model(model, image_array, label_array)
+
+    # load the Testing images and labels
+    # TODO: what are the test_labels?
+    # test_data, test_labels = load_json_and_img(args.data + "/test/images", args.out + "/test", args.use_numpy_files)
 
     # test the model
     # model = test_model(model, test_data, test_labels)
