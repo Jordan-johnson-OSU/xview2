@@ -22,9 +22,9 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import datasets, layers, models
-from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Add, Input, Concatenate
-from tensorflow.keras import layers
-from tensorflow.keras import optimizers
+#from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Add, Input, Concatenate
+#from tensorflow.keras import layers
+#from tensorflow.keras import optimizers
 from collections import defaultdict
 from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_class_weight
@@ -85,24 +85,37 @@ def build_model():
     :param data_dir:
     :return: model
     """
+    """
+    model = keras.sequential([
+        keras.layers.Flatten(input_shape=(1024, 1024)),
+        keras.layers.Dense(128, activation=tf.nn.relu),
+        keras.layers.Dense(5, activation=tf.nn.softmax)
+    ])
+    """
 
     #TODO: is this the right thing to start on?
     model = models.Sequential()
 
     #1024 x 1024 is how big the images are
-    inputs = Input(shape=(1024, 1024))
+    #inputs = Input(shape=(1024, 1024))
 
+    model.add(keras.layers.Flatten(input_shape=(1024, 1024)))
+    model.add(keras.layers.Dense(128, activation=tf.nn.relu))
+    model.add( keras.layers.Dense(5, activation=tf.nn.softmax))
+
+    """
     model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(1024, 1024)))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    """
 
     #print the output
     model.summary()
 
     #are more layers better?
-
+    """
     #Add Dense Layers
     model.add(layers.Flatten())
     model.add(layers.Dense(2048, activation='relu'))
@@ -114,7 +127,7 @@ def build_model():
 
     #print the output
     model.summary()
-
+    """
     #TODO: add weights and generators and optimizers
 
     # adam optimizer
@@ -209,7 +222,10 @@ def load_json_and_img(data_dir):
 
         labels.append(damage_type)
 
-    return images, labels
+    images_array = np.asarray(images)
+    labels_array = np.asarray(labels)
+
+    return images_array, labels_array
 
 def main():
     """
@@ -230,6 +246,10 @@ def main():
                         default=0.1,
                         metavar='Percentage to use for validation',
                         help="Percentage to use for validation")
+    parser.add_argument('--out',
+                        default='C:/Dev/Workspaces/Python/CS4793/xview2/out',
+                        metavar='Output directory',
+                        help="Output directory")
     args = parser.parse_args()
 
     """
@@ -243,6 +263,15 @@ def main():
     #image_array, label_array = load_json_and_img(args.data, float(args.val_split_pct))
     image_array, label_array = load_json_and_img(args.data)
     logging.info("Finished Load JSON and Image into numpy")
+
+    out_dir = args.out
+
+    #Save output file
+    np.save(out_dir + '/images.npy',image_array)
+    np.save(out_dir + '/label.npy', label_array)
+
+    #np.load(out_dir + '/images.npy')
+    #np.load(out_dir + '/label.npy')
 
     logging.info("Started build model")
     model = build_model()
