@@ -8,9 +8,6 @@ import argparse
 import json
 import logging
 import os
-# from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Add, Input, Concatenate
-# from tensorflow.keras import layers
-# from tensorflow.keras import optimizers
 from collections import defaultdict
 
 import numpy as np
@@ -41,6 +38,8 @@ Description:
 after 
     
 """
+
+
 def run_analysis():
     """
     Classification ranking?  Print out stuff?
@@ -48,6 +47,7 @@ def run_analysis():
     """
     logging.info("Started analysis")
     logging.info("Finished analysis")
+
 
 def test_model(model, test_data, test_labels):
     """
@@ -61,6 +61,7 @@ def test_model(model, test_data, test_labels):
     model.evaluate(test_data, test_labels)
     logging.info("Finished test model")
     return model
+
 
 def train_model(model, train_data, train_labels):
     """
@@ -83,6 +84,7 @@ def train_model(model, train_data, train_labels):
 
     return model
 
+
 def build_model(input_shape):
     """
     What are the weights, optimizer, etc.??
@@ -99,31 +101,31 @@ def build_model(input_shape):
     model.add( keras.layers.Dense(5, activation=tf.nn.softmax))
     """
 
-    model.add(keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(input_shape[1], input_shape[2], input_shape[3])))
+    model.add(keras.layers.Conv2D(32, (3, 3), activation='relu',
+                                  input_shape=(input_shape[1], input_shape[2], input_shape[3])))
     model.add(keras.layers.MaxPooling2D((2, 2)))
     model.add(keras.layers.Conv2D(64, (3, 3), activation='relu'))
     model.add(keras.layers.MaxPooling2D((2, 2)))
     model.add(keras.layers.Conv2D(64, (3, 3), activation='relu'))
 
+    # print the output
+    # model.summary()
 
-    #print the output
-    #model.summary()
+    # are more layers better?
 
-    #are more layers better?
-
-    #Add Dense Layers
+    # Add Dense Layers
     model.add(keras.layers.Flatten())
-    #model.add(keras.layers.Dense(2048, activation='relu'))
-    #model.add(keras.layers.Dense(1024, activation='relu'))
-    #model.add(keras.layers.Dense(512, activation='relu'))
-    #model.add(keras.layers.Dense(128, activation='relu'))
+    # model.add(keras.layers.Dense(2048, activation='relu'))
+    # model.add(keras.layers.Dense(1024, activation='relu'))
+    # model.add(keras.layers.Dense(512, activation='relu'))
+    # model.add(keras.layers.Dense(128, activation='relu'))
     model.add(keras.layers.Dense(64, activation='softmax'))
     model.add(keras.layers.Dense(5, activation='softmax'))
 
-    #print the output
+    # print the output
     model.summary()
 
-    #TODO: add weights and generators and optimizers
+    # TODO: add weights and generators and optimizers
 
     # adam optimizer
     adam = keras.optimizers.Adam(lr=0.0001,
@@ -132,15 +134,16 @@ def build_model(input_shape):
                                  decay=0.0,
                                  amsgrad=False)
 
-    #Compile
+    # Compile
     model.compile(optimizer=adam,
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
 
     logging.info("Finished build model")
 
-    #return model created
+    # return model created
     return model
+
 
 def colorize_mask_(mask, color_map=None):
     """
@@ -163,10 +166,13 @@ def colorize_mask_(mask, color_map=None):
     mask.putpalette(color_map.astype(np.uint8))
     return None
 
-def load_json_and_img(data_dir, out_dir):
+
+def load_json_and_img(data_dir, out_dir, use_files):
     """
     Assumptions about the data are that it looks like ../data/train/{damage}/images and ../data/train/{damage}/labels
 
+    :param use_files:  Boolean True or False to try to save and load npy files.  Do not use on server.
+    :param out_dir:
     :param data_dir:
     :return: images, labels
     """
@@ -174,16 +180,16 @@ def load_json_and_img(data_dir, out_dir):
     images_array = np.array([])
     labels_array = np.array([])
 
-    if os.path.isfile(out_dir + '/images.npy'):
+    if use_files & os.path.isfile(out_dir + '/images.npy'):
         logging.info("loading np arrays from files.")
         images_array = np.load(out_dir + '/images.npy')
         labels_array = np.load(out_dir + '/label.npy')
         logging.info("np arrays loaded from files.")
-    else :
+    else:
         data_dir = data_dir + "/train/images"
 
-        #If you wanted to Hard coded Path for training data...
-        #data_dir = "C:/Dev/Workspaces/Python/AI Learning/program/data/train/images"
+        # If you wanted to Hard coded Path for training data...
+        # data_dir = "C:/Dev/Workspaces/Python/AI Learning/program/data/train/images"
 
         image_paths = []
         image_paths.extend([(data_dir + "/" + pic) for pic in os.listdir(data_dir)])
@@ -197,7 +203,7 @@ def load_json_and_img(data_dir, out_dir):
             img_array = np.array(img_obj)
             images.append(img_array)
 
-            #Get corresponding label for the current image
+            # Get corresponding label for the current image
             label_path = img_path.replace('png', 'json').replace('images', 'labels')
             label_file = open(label_path)
             label_data = json.load(label_file)
@@ -222,13 +228,15 @@ def load_json_and_img(data_dir, out_dir):
         labels_array = np.asarray(labels)
         logging.info("arrays converted to numpy arrays")
 
-        # Save output file
-        np.save(out_dir + '/label.npy', labels_array)
-        np.save(out_dir + '/images.npy',images_array)
-        logging.info("np arrays saved.")
+        if use_files:
+            # Save output file
+            np.save(out_dir + '/label.npy', labels_array)
+            np.save(out_dir + '/images.npy', images_array)
+            logging.info("np arrays saved.")
 
     logging.info("Finished Load JSON and Image into numpy")
     return images_array, labels_array
+
 
 def main():
     """
@@ -239,8 +247,8 @@ def main():
     parser = argparse.ArgumentParser(description='CS4793 Training Model')
     parser.add_argument('--data',
                         default='C:/Dev/Workspaces/Python/CS4793/xview2/data',
-                        #Malay's dir
-                        #default='D:/Fall2019/AI/train',
+                        # Malay's dir
+                        # default='D:/Fall2019/AI/train',
                         metavar="/home/scratch1/cs4793/data",
                         help="Full path to the parent data directory")
     parser.add_argument('--val_split_pct',
@@ -250,10 +258,16 @@ def main():
                         help="Percentage to use for validation")
     parser.add_argument('--out',
                         default='C:/Dev/Workspaces/Python/CS4793/xview2/out',
-                        #Malay's Dir
-                        #default='D:/Fall2019/AI/train/out',
+                        # Malay's Dir
+                        # default='D:/Fall2019/AI/train/out',
                         metavar='Output directory',
                         help="Output directory")
+    parser.add_argument('--use_numpy_files',
+                        default=True,
+                        # Malay's Dir
+                        # default='D:/Fall2019/AI/train/out',
+                        metavar='Should the program try to save and load npy files for the image and label np arrays.',
+                        help="True or False: Designate if the program should try to save and load npy files")
     args = parser.parse_args()
 
     """
@@ -262,21 +276,20 @@ def main():
     3. Cake!
     """
 
-    #load the images and labels
-    image_array, label_array = load_json_and_img(args.data, args.out)
+    # load the images and labels
+    image_array, label_array = load_json_and_img(args.data, args.out, args.use_numpy_files)
 
-    #build the model
+    # build the model
     model = build_model(image_array.shape)
 
-    #train the model
+    # train the model
     model = train_model(model, image_array, label_array)
 
-    #test the model
-    #model = test_model(model, test_data, test_labels)
+    # test the model
+    # model = test_model(model, test_data, test_labels)
 
-    #do some analysis
-    #run_analysis(model)
-
+    # do some analysis
+    # run_analysis(model)
 
 
 if __name__ == "__main__":
