@@ -29,7 +29,10 @@ from collections import defaultdict
 from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_class_weight
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 # Set a random seed so runs are repeatable
 np.random.seed(98234)  # need to set numpy seed since np.random.shuffle is used
@@ -69,14 +72,17 @@ def train_model(model, train_data, train_labels):
     :param model:
     :return: model
     """
+    model.fit(train_data, train_labels, epochs=10)
+
+    """
     train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, test_size=.15)
     model.fit(train_data, train_labels, epochs=10,
          validation_data=(val_data, val_labels))
-
+    """
 
     return model
 
-def build_model():
+def build_model(input_shape):
     """
     look at the the xview2/baseline/model/damage_classification.py and xview2/baseline/model/model.py
     CNN?
@@ -99,7 +105,7 @@ def build_model():
     #1024 x 1024 is how big the images are
     #inputs = Input(shape=(1024, 1024))
 
-    model.add(keras.layers.Flatten(input_shape=(1024, 1024)))
+    model.add(keras.layers.Flatten(input_shape=input_shape))
     model.add(keras.layers.Dense(128, activation=tf.nn.relu))
     model.add( keras.layers.Dense(5, activation=tf.nn.softmax))
 
@@ -149,6 +155,9 @@ def colorize_mask_(mask, color_map=None):
     """
     Attaches a color palette to a PIL image. So long as the image is saved as a PNG, it will render visibly using the
     provided color map.
+
+    This could be used to identify the different colors of damage within an image.
+
     :param mask: PIL image whose values are only 0 to 4 inclusive
     :param color_map: np.ndarray or list of 3-tuples with 5 rows
     :return:
@@ -163,68 +172,69 @@ def colorize_mask_(mask, color_map=None):
     mask.putpalette(color_map.astype(np.uint8))
     return None
 
-def load_json_and_img(data_dir):
+def load_json_and_img(data_dir, out_dir):
     """
     Assumptions about the data are that it looks like ../data/train/{damage}/images and ../data/train/{damage}/labels
 
     :param data_dir:
     :return: images, labels
     """
+    logging.info("Started Load JSON and Image into numpy")
+    images_array = np.array([])
+    labels_array = np.array([])
 
-    data_dir = data_dir + "/train/images"
+    if os.path.isfile(out_dir + '/images.npy'):
+        logging.info("loading np arrays from files.")
+        images_array = np.load(out_dir + '/images.npy')
+        labels_array = np.load(out_dir + '/label.npy')
+        logging.info("np arrays loaded from files.")
+    else :
+        data_dir = data_dir + "/train/images"
 
-    #If you wanted to Hard coded Path for training data...
-    #data_dir = "C:/Dev/Workspaces/Python/AI Learning/program/data/train/images"
+        #If you wanted to Hard coded Path for training data...
+        #data_dir = "C:/Dev/Workspaces/Python/AI Learning/program/data/train/images"
 
-    image_paths = []
-    """
-    for pic in os.listdir(data_dir):
-        image_paths.append((str(data_dir) + "/" + pic))
-    """
+        image_paths = []
+        image_paths.extend([(data_dir + "/" + pic) for pic in os.listdir(data_dir)])
 
-    """
-    df = pd.read_csv(data_dir + "/xBD_csv/train.csv")
-    class_weights = compute_class_weight('balanced', np.unique(df['labels'].to_list()), df['labels'].to_list());
-    weights = dict(enumerate(class_weights))
+        images = []
+        labels = []
 
-    samples = df['uuid'].count()
-    steps = np.ceil(samples/64)
-    """
+        for img_path in tqdm(image_paths):
 
-    image_paths.extend([(data_dir + "/" + pic) for pic in os.listdir(data_dir)])
-    #img_paths = np.asarray(image_paths)
-    images = []
-    labels = []
+            img_obj = Image.open(img_path)
+            img_array = np.array(img_obj)
+            images.append(img_array)
 
-    for img_path in tqdm(image_paths):
+            #Get corresponding label for the current image
+            label_path = img_path.replace('png', 'json').replace('images', 'labels')
+            label_file = open(label_path)
+            label_data = json.load(label_file)
+            damage_type = "no-damage"
 
-        img_obj = Image.open(img_path)
-        img_array = np.array(img_obj)
-        images.append(img_array)
+            for feat in label_data['features']['xy']:
 
-        #Get corresponding label for the current image
-        label_path = img_path.replace('png', 'json').replace('images', 'labels')
-        label_file = open(label_path)
-        label_data = json.load(label_file)
-        damage_type = "no-damage"
+                # only images post-disaster will have damage type
+                try:
+                    damage_type = feat['properties']['subtype']
+                    if damage_type != "no-damage":
+                        break
 
-        for feat in label_data['features']['xy']:
+                except:  # pre-disaster damage is default no-damage
+                    continue
 
-            # only images post-disaster will have damage type
-            try:
-                damage_type = feat['properties']['subtype']
-                if damage_type != "no-damage":
-                    break
+            labels.append(damage_type)
 
-            except:  # pre-disaster damage is default no-damage
-                damage_type = "no-damage"
-                continue
+        images_array = np.asarray(images)
+        labels_array = np.asarray(labels)
+        logging.info("arrays converted to numpy arrays")
 
-        labels.append(damage_type)
+        # Save output file
+        np.save(out_dir + '/label.npy', labels_array)
+        np.save(out_dir + '/images.npy',images_array)
+        logging.info("np arrays saved.")
 
-    images_array = np.asarray(images)
-    labels_array = np.asarray(labels)
-
+    logging.info("Finished Load JSON and Image into numpy")
     return images_array, labels_array
 
 def main():
@@ -259,22 +269,12 @@ def main():
     """
 
 
-    logging.info("Started Load JSON and Image into numpy")
-    #image_array, label_array = load_json_and_img(args.data, float(args.val_split_pct))
-    image_array, label_array = load_json_and_img(args.data)
-    logging.info("Finished Load JSON and Image into numpy")
 
-    out_dir = args.out
-
-    #Save output file
-    np.save(out_dir + '/images.npy',image_array)
-    np.save(out_dir + '/label.npy', label_array)
-
-    #np.load(out_dir + '/images.npy')
-    #np.load(out_dir + '/label.npy')
+    #load the images and labels
+    image_array, label_array = load_json_and_img(args.data, args.out)
 
     logging.info("Started build model")
-    model = build_model()
+    model = build_model(image_array.shape)
     logging.info("Finished build model")
 
     logging.info("Started train model")
