@@ -1,5 +1,9 @@
 """
-CS4793
+CS4793 - Working on xview2 data challenge.
+
+https://xview2.org/
+
+assessing building damage after a natural disaster
 
 @authors: Melanie Bischoff, Malay Bhakta, Jordan Johnson
 """
@@ -58,7 +62,7 @@ def test_model(model, test_data, test_labels):
     :return:
     """
     logging.info("Started test model")
-    model.evaluate(test_data, test_labels, batch_size=64)
+    model.evaluate(test_data, test_labels, batch_size=32)
     logging.info("Finished test model")
     return model
 
@@ -122,7 +126,9 @@ def build_model(input_shape):
     # model.add(keras.layers.Dense(1024, activation='relu'))
     # model.add(keras.layers.Dense(512, activation='relu'))
     # model.add(keras.layers.Dense(128, activation='relu'))
-    model.add(keras.layers.Dense(64, activation='softmax'))
+    # model.add(keras.layers.Dense(64, activation='softmax'))
+    # model.add(keras.layers.Dense(32, activation='softmax'))
+    model.add(keras.layers.Dense(16, activation='softmax'))
     model.add(keras.layers.Dense(5, activation='softmax'))
 
     # print the output
@@ -203,6 +209,10 @@ def load_json_and_img(data_dir, out_dir, use_files):
         for img_path in tqdm(image_paths):
 
             img_obj = Image.open(img_path)
+            # resize the image
+            IMAGE_SHAPE = (512, 512)
+            img_obj = img_obj.resize(IMAGE_SHAPE)
+
             img_array = np.array(img_obj)
             images.append(img_array)
 
