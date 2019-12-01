@@ -217,7 +217,7 @@ def load_json_and_img(data_dir, out_dir, use_files):
         for img_path in tqdm(image_paths):
             if i > 60:
                 break;
-            i += 1
+            #i += 1
             img_obj = Image.open(img_path)
             # resize the image
             IMAGE_SHAPE = (512, 512)
