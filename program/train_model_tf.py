@@ -19,6 +19,7 @@ import tensorflow as tf
 from PIL import Image
 from tensorflow import keras
 from tqdm import tqdm
+import  h5py
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -78,7 +79,7 @@ def train_model(model, train_data, train_labels):
     logging.info("Started train model")
 
     model.fit(train_data, train_labels, batch_size=64, epochs=10)
-
+    model.save('Model')
     """
     train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, test_size=.15)
     

@@ -139,12 +139,12 @@ def build_model(input_shape):
 
     # Add Dense Layers
     model.add(keras.layers.Flatten())
-    model.add(keras.layers.Dense(2048, activation='relu'))
-    model.add(keras.layers.Dense(1024, activation='relu'))
-    model.add(keras.layers.Dense(512, activation='relu'))
-    model.add(keras.layers.Dense(128, activation='relu'))
-    model.add(keras.layers.Dense(64, activation='softmax'))
-    model.add(keras.layers.Dense(32, activation='softmax'))
+    #model.add(keras.layers.Dense(2048, activation='relu'))
+    #model.add(keras.layers.Dense(1024, activation='relu'))
+    #model.add(keras.layers.Dense(512, activation='relu'))
+    #model.add(keras.layers.Dense(128, activation='relu'))
+    #model.add(keras.layers.Dense(64, activation='softmax'))
+    #model.add(keras.layers.Dense(32, activation='softmax'))
     model.add(keras.layers.Dense(16, activation='softmax'))
     model.add(keras.layers.Dense(5, activation='softmax'))
 
