@@ -85,7 +85,7 @@ def train_model(model, train_data, train_labels):
     train_labels = label1.fit_transform(train_labels)
     print(train_labels)
     print(train_data.shape, train_labels.shape)
-    history = model.fit(train_data, train_labels, batch_size=64, epochs=1)
+    history = model.fit(train_data, train_labels, batch_size=32, epochs=10)
     # train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels))
     """
     f = plt.figure()
@@ -103,7 +103,7 @@ def train_model(model, train_data, train_labels):
     model.fit(train_data, train_labels, epochs=10,
          validation_data=(val_data, val_labels))
     """
-    model.save('Model')
+    model.save('ModelVal')
     logging.info("Finished train model")
 
     return model
@@ -142,7 +142,7 @@ def build_model(input_shape):
     #model.add(keras.layers.Dense(2048, activation='relu'))
     #model.add(keras.layers.Dense(1024, activation='relu'))
     #model.add(keras.layers.Dense(512, activation='relu'))
-    #model.add(keras.layers.Dense(128, activation='relu'))
+    model.add(keras.layers.Dense(128, activation='relu'))
     #model.add(keras.layers.Dense(64, activation='softmax'))
     #model.add(keras.layers.Dense(32, activation='softmax'))
     model.add(keras.layers.Dense(16, activation='softmax'))
