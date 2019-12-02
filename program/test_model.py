@@ -144,6 +144,55 @@ def load_json_and_img(data_dir, out_dir, use_files):
     return images_array, labels_array
 
 
+def load_test_img(data_dir, out_dir, use_files):
+    logging.info("Started Load JSON and Image into numpy")
+    images_array = np.array([])
+    labels_array = np.array([])
+
+    if use_files & os.path.isfile(out_dir + '/images.npy'):
+        logging.info("loading np arrays from files.")
+        images_array = np.load(out_dir + '/images.npy')
+        labels_array = np.load(out_dir + '/label.npy')
+        logging.info("np arrays loaded from files.")
+    else:
+        # data_dir = data_dir + "/train/images"
+
+        # If you wanted to Hard coded Path for training data...
+        # data_dir = "C:/Dev/Workspaces/Python/AI Learning/program/data/train/images"
+
+        image_paths = []
+        image_paths.extend([(data_dir + "/" + pic) for pic in os.listdir(data_dir)])
+
+        images = []
+        labels = []
+
+        for img_path in tqdm(image_paths):
+
+            img_obj = Image.open(img_path)
+            # resize the image
+            IMAGE_SHAPE = (512, 512)
+            img_obj = img_obj.resize(IMAGE_SHAPE)
+
+            img_array = np.array(img_obj)
+            images.append(img_array)
+
+            # Get corresponding label for the current image
+
+
+        images_array = np.asarray(images)
+
+        logging.info("arrays converted to numpy arrays")
+
+        if use_files:
+            # Save output file
+            #np.save(out_dir + '/label.npy', labels_array)
+            np.save(out_dir + '/images.npy', images_array)
+            logging.info("np arrays saved.")
+
+    logging.info("Finished test Images into numpy")
+    return images_array
+
+
 def main():
     """
     Main Method to parse the inputs, and methods to feed in json data, load images into numpy array, and build/train/test model.
@@ -195,7 +244,18 @@ def main():
     # load the Testing images and labels
     # TODO: what are the test_labels?
     # test_data, test_labels = load_json_and_img(args.data + "/test/images", args.out + "/test", args.use_numpy_files)
+    test_data = load_test_img(args.data + "/test/images", args.out + "/test", args.use_numpy_files)
 
+    predict = model.predict(test_data,
+                            batch_size=None,
+                            verbose=0,
+                            steps=None,
+                            callbacks=None,
+                            max_queue_size=10,
+                            workers=1,
+                            use_multiprocessing=False)
+
+    print(predict)
     # test the model
     # model = test_model(model, test_data, test_labels)
 
