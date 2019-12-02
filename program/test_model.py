@@ -342,11 +342,12 @@ def main():
 
     print(predict)
     """
-    predict = model.predict_classes(test_data)
-    print(predict)
+    predict = model.predict_classes(test_data, batch_size = 10, verbose = 1)
+    for i in predict:
+        print(i)
     # test the model
     # model = test_model(model, test_data, test_labels)
-    model.evaluate(test_data, test_label)
+    # model.evaluate(test_data, test_label)
     # do some analysis
     # run_analysis(model)
     mat = confusion_matrix(test_label, predict)
@@ -357,6 +358,8 @@ def main():
     class_name = ['0', '1', '2', '3']
 
     print(mat)
+
+
 
     np.set_printoptions(precision=2)
     plot_confusion_matrix(test_label, predict, classes=class_name, title='Confusion matrix, without normalization')
