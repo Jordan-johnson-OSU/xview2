@@ -80,12 +80,11 @@ def train_model(model, train_data, train_labels):
     """
     logging.info("Started train model")
 
-    history = model.fit(train_data, train_labels, batch_size=64, epochs=10)
-
     label1 = LabelEncoder()
     train_labels = label1.fit_transform(train_labels)
     print(train_labels)
     print(train_data.shape, train_labels.shape)
+    history = model.fit(train_data, train_labels, batch_size=64, epochs=1)
     # train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels))
     """
     f = plt.figure()
