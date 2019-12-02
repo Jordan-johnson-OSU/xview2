@@ -80,7 +80,7 @@ def train_model(model, train_data, train_labels):
     """
     logging.info("Started train model")
 
-    #model.fit(train_data, train_labels, batch_size=64, epochs=10)
+    history = model.fit(train_data, train_labels, batch_size=64, epochs=10)
 
     label1 = LabelEncoder()
     train_labels = label1.fit_transform(train_labels)
@@ -93,7 +93,7 @@ def train_model(model, train_data, train_labels):
     plt.imshow(train_data[0])
     plt.show(block=True)
     """
-    history = model.fit(train_data, train_labels, batch_size=64, validation_split=0.2, epochs=10)
+    #history = model.fit(train_data, train_labels, batch_size=64, validation_split=0.2, epochs=10)
     print(history.history)
     """
     train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, test_size=.15)
@@ -103,6 +103,7 @@ def train_model(model, train_data, train_labels):
     model.fit(train_data, train_labels, epochs=10,
          validation_data=(val_data, val_labels))
     """
+    model.save('Model')
     logging.info("Finished train model")
 
     return model
@@ -138,12 +139,12 @@ def build_model(input_shape):
 
     # Add Dense Layers
     model.add(keras.layers.Flatten())
-    # model.add(keras.layers.Dense(2048, activation='relu'))
-    # model.add(keras.layers.Dense(1024, activation='relu'))
-    # model.add(keras.layers.Dense(512, activation='relu'))
-    # model.add(keras.layers.Dense(128, activation='relu'))
-    # model.add(keras.layers.Dense(64, activation='softmax'))
-    # model.add(keras.layers.Dense(32, activation='softmax'))
+    model.add(keras.layers.Dense(2048, activation='relu'))
+    model.add(keras.layers.Dense(1024, activation='relu'))
+    model.add(keras.layers.Dense(512, activation='relu'))
+    model.add(keras.layers.Dense(128, activation='relu'))
+    model.add(keras.layers.Dense(64, activation='softmax'))
+    model.add(keras.layers.Dense(32, activation='softmax'))
     model.add(keras.layers.Dense(16, activation='softmax'))
     model.add(keras.layers.Dense(5, activation='softmax'))
 
