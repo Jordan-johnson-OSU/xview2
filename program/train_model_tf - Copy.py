@@ -16,10 +16,12 @@ from collections import defaultdict
 
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from PIL import Image
 from sklearn.preprocessing import LabelEncoder
 from tensorflow import keras
 from tqdm import tqdm
+
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -85,8 +87,14 @@ def train_model(model, train_data, train_labels):
     print(train_labels)
     print(train_data.shape, train_labels.shape)
     # train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels))
-
-    history = model.fit(train_data, train_labels, batch_size=32, validation_split=0.2, epochs=1)
+    """
+    f = plt.figure()
+    f.add_subplot(1, 2, 1)
+    plt.imshow(train_data[0])
+    plt.show(block=True)
+    """
+    history = model.fit(train_data, train_labels, batch_size=64, validation_split=0.2, epochs=10)
+    print(history.history)
     """
     train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, test_size=.15)
     
@@ -312,7 +320,7 @@ def main():
     # TODO: what are the test_labels?
     # test_data, test_labels = load_json_and_img(args.data + "/test/images", args.out + "/test", args.use_numpy_files)
 
-    # test the model
+    # test the model / predict
     # model = test_model(model, test_data, test_labels)
 
     # do some analysis
