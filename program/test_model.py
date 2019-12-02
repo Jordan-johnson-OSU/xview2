@@ -20,6 +20,7 @@ from PIL import Image
 from sklearn.preprocessing import LabelEncoder
 from tensorflow import keras
 from tqdm import tqdm
+import h5py
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
