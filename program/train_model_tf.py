@@ -5,7 +5,11 @@ https://xview2.org/
 
 assessing building damage after a natural disaster
 
-@authors: Melanie Bischoff, Malay Bhakta, Jordan Johnson
+Goal: Identify damaged buildings from xview2.org challenge.
+
+Description: builds a CNN, learns for most critical damage and analyzes the results on test set of images.
+
+@authors: Malay Bhakta, Melanie Bischoff, Jordan Johnson
 """
 
 import argparse
@@ -23,12 +27,6 @@ from sklearn.model_selection import train_test_split
 from tensorflow import keras
 from tqdm import tqdm
 
-"""
-Goal: pretend like we know something about AI programming....
-   
-Description: 
-    
-"""
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
@@ -36,7 +34,7 @@ logging.basicConfig(
 
 # Set a random seed so runs are repeatable
 np.random.seed(98234)  # need to set numpy seed since np.random.shuffle is used
-tf.random.set_seed(98234)  # and tensorflow graph seed
+# tf.random.set_seed(98234)  # and tensor flow graph seed
 
 damage_intensity_encoding = defaultdict(lambda: 0)
 damage_intensity_encoding['destroyed'] = 3
@@ -127,8 +125,10 @@ def run_analysis(predictions, test_labels, out_dir):
     if os.name == 'nt':
         class_name = ['0', '1', '2', '3']
         np.set_printoptions(precision=2)
-        plot_confusion_matrix(test_labels, predictions, classes=class_name, title='Confusion matrix, without normalization')
-        plot_confusion_matrix(test_labels, predictions, classes=class_name, normalize=True, title='Normalized confusion matrix')
+        plot_confusion_matrix(test_labels, predictions, classes=class_name, title='Confusion matrix, w/o '
+                                                                                  'normalization')
+        plot_confusion_matrix(test_labels, predictions, classes=class_name, normalize=True, title='Confusion matrix, '
+                                                                                                  'normalized')
 
         plt.show()
 
@@ -158,7 +158,7 @@ def test_model(model, test_data, test_labels):
                                 workers=8,
                                 use_multiprocessing=False)
     """
-    predictions = model.predict_classes(test_data, verbose=1)
+    predictions = model.predict_classes(test_data, batch_size=32, verbose=1)
     logging.info("Finished test model")
     return predictions
 
@@ -193,7 +193,8 @@ def train_model(model, out_model, train_data, train_labels):
                                                          period=1)
 
         train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, test_size=.10)
-        model.fit(train_data, train_labels, batch_size=32, epochs=10, validation_data=(val_data, val_labels), callbacks=[cp_callback])
+        model.fit(train_data, train_labels, batch_size=32, epochs=10,
+                  validation_data=(val_data, val_labels), callbacks=[cp_callback])
         # model.fit(train_data, train_labels, batch_size=32, epochs=10, callbacks=[cp_callback])
         # model.save("Model")
         logging.info("Model saved to files")
@@ -417,6 +418,7 @@ def main():
     # load the Testing images and labels (there will be no labels)
     test_data, test_labels = load_json_and_img(args.data + "/test/images", out_testing, args.use_numpy_files)
 
+    # reformat data to float32 for predictions to work...
     test_data = tf.dtypes.cast(test_data, tf.float32)
 
     # test the model
