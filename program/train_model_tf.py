@@ -135,14 +135,19 @@ def run_analysis(predictions, test_labels, out_dir):
     logging.info("Finished analysis")
 
 
-def test_model(model, test_data):
+def test_model(model, test_data, test_labels):
     """
 
+    :param test_labels:
     :param model:
     :param test_data:
     :return predictions: This should be a numpy array
     """
     logging.info("Started test model")
+
+    loss, acc = model.evaluate(test_data, test_labels, verbose=2)
+    logging.info("Testing evaluation of model, accuracy: {:5.2f}%".format(100 * acc))
+
     """
     predictions = model.perdict(test_data,
                                 batch_size=32,
@@ -153,7 +158,7 @@ def test_model(model, test_data):
                                 workers=8,
                                 use_multiprocessing=False)
     """
-    predictions = model.predict_classes(test_data, batch_size=16, verbose=1)
+    predictions = model.predict_classes(test_data, verbose=1)
     logging.info("Finished test model")
     return predictions
 
@@ -177,6 +182,7 @@ def train_model(model, out_model, train_data, train_labels):
     checkpoint_dir = os.path.dirname(checkpoint_path)
 
     if os.path.exists(checkpoint_dir):
+        # model.load("Model")
         model.load_weights(checkpoint_path)
         logging.info("Model Loaded from files")
     else:
@@ -189,7 +195,7 @@ def train_model(model, out_model, train_data, train_labels):
         train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, test_size=.10)
         model.fit(train_data, train_labels, batch_size=32, epochs=10, validation_data=(val_data, val_labels), callbacks=[cp_callback])
         # model.fit(train_data, train_labels, batch_size=32, epochs=10, callbacks=[cp_callback])
-
+        # model.save("Model")
         logging.info("Model saved to files")
 
     loss, acc = model.evaluate(train_data, train_labels, verbose=2)
@@ -301,7 +307,7 @@ def load_json_and_img(data_dir, out_dir, use_files):
         logging.info("np arrays loaded from files: %s.", out_dir + '/images.npy & label.npy')
     else:
         # If you wanted to Hard coded Path for training data...
-        # data_dir = "C:/Dev/Workspaces/Python/AI Learning/program/data/train/images"
+        # data_dir = "/path to data d"
 
         image_paths = []
         image_paths.extend([(data_dir + "/" + pic) for pic in os.listdir(data_dir)])
@@ -312,6 +318,7 @@ def load_json_and_img(data_dir, out_dir, use_files):
         for img_path in tqdm(image_paths):
 
             img_obj = Image.open(img_path)
+
             # resize the image
             image_shape = (512, 512)
             img_obj = img_obj.resize(image_shape)
@@ -410,8 +417,10 @@ def main():
     # load the Testing images and labels (there will be no labels)
     test_data, test_labels = load_json_and_img(args.data + "/test/images", out_testing, args.use_numpy_files)
 
+    test_data = tf.dtypes.cast(test_data, tf.float32)
+
     # test the model
-    predictions = test_model(model, test_data)
+    predictions = test_model(model, test_data, test_labels)
 
     # do some analysis
     run_analysis(predictions, test_labels, args.out)
